@@ -1,0 +1,82 @@
+scalar Date
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum Role {
+  admin
+  moderator
+  user
+}
+
+enum PhoneStatus {
+  verified
+  unverified
+  none
+}
+
+type User {
+  id: ID!
+  email: String!
+  role: Role!
+  firstName: String
+  lastName: String
+  gender: Gender
+  avatar: String
+  phoneNumber: String
+  isPhoneVerified: Boolean
+  isTwoFactorEnabled: Boolean
+  createdAt: Date!
+}
+
+input AdminGetUsersInput {
+  search: String
+  role: [Role!]
+  gender: Gender
+  phoneStatus: PhoneStatus
+  isTwoFactorEnabled: Boolean
+  isVerified: Boolean
+  isDeactivated: Boolean
+}
+
+type Query {
+  getProfile: User
+  adminGetUsers(data: AdminGetUsersInput!): [User!]!
+}
+
+type StatusResponse {
+  success: Boolean!
+  message: String!
+}
+
+input ChangePasswordInput {
+  password: String!
+}
+
+input UpdateProfileInput {
+  firstName: String!
+  lastName: String
+  avatar: String
+  gender: Gender
+}
+
+type Mutation {
+  deleteAccount: StatusResponse!
+  changePassword(data: ChangePasswordInput!): StatusResponse!
+  updateProfile(data: UpdateProfileInput!): User!
+  addPhone(phoneNumber: String!): StatusResponse!
+  deletePhone: StatusResponse!
+  verifyPhone(code: String!): StatusResponse!
+  disableOtp: StatusResponse!
+  enableOtp: StatusResponse!
+  sendOtpToUser: StatusResponse!
+  verifyEnableOtp(code: String!): StatusResponse!
+  adminDeleteUser(userId: ID!): StatusResponse!
+  adminDisableOtp(userIds: [ID!]!): StatusResponse!
+  adminSetDeactivity(userIds: [ID!]!, isDeactivated: Boolean!): StatusResponse!
+  adminSetRole(userId: ID!, role: Role!): StatusResponse!
+  adminVerifyEmail(userIds: [ID!]!): StatusResponse!
+}

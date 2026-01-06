@@ -1,0 +1,87 @@
+generator client {
+    provider = "prisma-client-js"
+    previewFeatures = ["omitApi"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum Role {
+  admin
+  moderator
+  user
+}
+
+// User profile
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String?  
+    role      Role  @default(user)
+
+    firstName   String
+    lastName    String?
+    gender      Gender?
+    avatar      String?
+    birthDate  DateTime?   @db.Date
+
+    phoneNumber       String?   @unique
+    isPhoneVerified   Boolean   @default(false)
+
+    isTwoFactorEnabled Boolean   @default(false)
+
+    phoneCode         String?
+    phoneCodeExpires  DateTime?
+    otpAttempts       Int       @default(0)
+
+    isVerified        Boolean   @default(false)
+    verificationToken String?
+
+    isDeactivated     Boolean   @default(false)
+
+    resetPasswordToken   String?
+    resetPasswordExpires DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    accounts  Account[]
+    refreshTokens RefreshToken[]
+
+    @@map("users")
+}
+
+// User account
+model Account {
+    id                String  @id @default(uuid())
+  
+    userId            Int
+    user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    type              String  // "oauth"
+    provider          String  // "google", "facebook" etc.
+    providerAccountId String 
+
+    @@unique([provider, providerAccountId])
+    @@map("accounts")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
